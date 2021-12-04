@@ -15,13 +15,25 @@ set(CMAKE_PREFIX_PATH "/home/shawntao/Qt/6.2.1/gcc_64")
 
 find_package(QT NAMES Qt6 COMPONENTS Core REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core REQUIRED)
+# find_package(YAML)
 
+
+link_directories(${PROJECT_SOURCE_DIR}/lib)
+
+# import workflow
 include_directories(/usr/local/include/workflow/)
 link_directories(/usr/local/lib)
-#link_directories()
 
-add_executable(QES
-  http_server.h http_server.cpp main.cpp
-)
-target_link_libraries(QES Qt${QT_VERSION_MAJOR}::Core)
-target_link_libraries(QES libworkflow.so)
+#import yaml
+# include_directories(${PROJECT_SOURCE_DIR}/yaml/include)
+# link_directories(${PROJECT_SOURCE_DIR}/yaml/lib)
+
+#import include
+include_directories(${PROJECT_SOURCE_DIR}/include)
+
+FILE(GLOB_RECURSE SOURCE_FILES src/*.c* include/*.h*)
+
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+target_link_libraries(${PROJECT_NAME} Qt${QT_VERSION_MAJOR}::Core)
+target_link_libraries(${PROJECT_NAME} libworkflow.so)
+target_link_libraries(${PROJECT_NAME} libyaml-cpp.a)

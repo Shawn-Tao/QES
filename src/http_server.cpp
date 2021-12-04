@@ -1,13 +1,10 @@
 #include "http_server.h"
+#include<iostream>
 
 
 Http_Server::Http_Server(QString port, QObject *parent)
 {
     this->port = port.toUShort();
-//    QObject::connect(this,&http_server::Start_detect,[=]{
-//        qDebug()<<"Hello World!\n";
-//    });
-//    this->run();
 }
 
 void Http_Server::process(WFHttpTask *server_task)
@@ -16,13 +13,28 @@ void Http_Server::process(WFHttpTask *server_task)
     protocol::HttpResponse *resp = server_task->get_resp();
     long long seq = server_task->get_task_seq();
     protocol::HttpHeaderCursor cursor(req);
+    protocol::HttpChunkCursor chunkcursor(req);
+
+    //head
     std::string name;
     std::string value;
+    //chunk
+    const void *chunk;
+    size_t size;
     char buf[8192];
     int len;
 
     /* Set response message body. */
     resp->append_output_body_nocopy("<html>", 6);
+
+
+/****************************************************
+ * req->get_method() : get request method
+ * req->get_request_uri() : get request uri : the content after port in url
+ * req->get_http_version() : get http_version , mostly be 1.1
+ * cursor.next(name, value) : let name and value be the next one; defult there are accept-encoding,content-length,host,connection
+ * chunkcursor.next(&chunk, &size) : get chunk and size maybe chunk can be regarded as char*;
+*/
     len = snprintf(buf, 8192, "<p>%s %s %s</p>", req->get_method(),
                    req->get_request_uri(), req->get_http_version());
     resp->append_output_body(buf, len);
@@ -30,6 +42,14 @@ void Http_Server::process(WFHttpTask *server_task)
     while (cursor.next(name, value))
     {
         len = snprintf(buf, 8192, "<p>%s: %s</p>", name.c_str(), value.c_str());
+        resp->append_output_body(buf, len);
+    }
+
+// parser chunk part, let the gcc regard it as char* ; chunk can have a lot part
+
+    while (chunkcursor.next(&chunk, &size))
+    {
+        len = snprintf(buf, 8192, "<p>%s</p>", (char*)(chunk));
         resp->append_output_body(buf, len);
     }
 

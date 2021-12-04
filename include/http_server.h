@@ -19,6 +19,7 @@
 #include "workflow/WFServer.h"
 #include "workflow/WFHttpServer.h"
 #include "workflow/WFFacilities.h"
+#include "workflow/WFTaskFactory.h"
 #include <QtDebug>
 
 static WFFacilities::WaitGroup wait_group(1);
